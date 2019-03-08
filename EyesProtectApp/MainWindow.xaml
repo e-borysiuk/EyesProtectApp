@@ -4,9 +4,30 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EyesProtectApp"
+        xmlns:controls="clr-namespace:Notifications.Wpf.Controls;assembly=Notifications.Wpf"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        
+        Title="MainWindow" SizeToContent="WidthAndHeight">
+    <Grid Margin="15">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition></ColumnDefinition>
+            <ColumnDefinition></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition></RowDefinition>
+            <RowDefinition></RowDefinition>
+            <RowDefinition></RowDefinition>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Column="0" Grid.Row="0" Orientation="Horizontal" Margin="10">
+            <Label>Status: </Label>
+            <Label Name="LbStatus">Running</Label>
+        </StackPanel>
+        <StackPanel Grid.Column="1" Grid.Row="0" Orientation="Horizontal" Margin="10">
+            <Label>Next reminder:</Label>
+            <Label Name="LbRemaining" Content="{Binding Remaining}"></Label>
+        </StackPanel>
+        <Label HorizontalAlignment="Right" Grid.Column="0" Grid.Row="1" Margin="15">Interval:</Label>
+        <TextBox Padding="5" TextAlignment="Right" Grid.Column="1" Grid.Row="1"  Name="TbInterval" MinWidth="100" Margin="15">15</TextBox>
+        <Button Name="BtStart" Click="BtStart_OnClick" Grid.Column="1" Grid.Row="2" Margin="20" Height="30" Width="100">Start</Button>
+        <Button Name="BtStop" Click="BtStop_OnClick" Grid.Column="0" Grid.Row="2" Margin="20" Height="30" Width="100">Stop</Button>
     </Grid>
 </Window>

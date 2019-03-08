@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Media;
 using System.Text;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -12,6 +15,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
+using Notifications.Wpf;
 
 namespace EyesProtectApp
 {
@@ -20,9 +25,110 @@ namespace EyesProtectApp
     /// </summary>
     public partial class MainWindow : Window
     {
+        private readonly NotificationManager _notificationManager = new NotificationManager();
+        private DispatcherTimer _timer;
+        private DispatcherTimer _remainingTimer;
+        private DateTime _startTime;
+        private string _remaining;
+
+        public string Remaining
+        {
+            get => _remaining;
+            set
+            {
+                _remaining = value;
+                OnPropertyChanged(nameof(Remaining));
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
         public MainWindow()
         {
             InitializeComponent();
+            WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            StartTimer(15);
+            Closing += OnClosing;
+        }
+
+        private void Timer_Elapsed(object sender, EventArgs e)
+        {
+            _startTime = DateTime.Now;
+           _notificationManager.Show("Look away");
+           SystemSounds.Beep.Play();
+           SystemSounds.Beep.Play();
+        }
+
+        public static double ConvertMinutesToMilliseconds(double minutes)
+        {
+            return TimeSpan.FromMinutes(minutes).TotalMilliseconds;
+        }
+
+        private void StopTimer()
+        {
+            _timer?.Stop();
+            _remainingTimer?.Stop();
+        }
+
+        private void StartTimer(int interval)
+        {
+            _startTime = DateTime.Now;
+            _timer = new DispatcherTimer();
+            _timer.Interval = TimeSpan.FromMinutes(interval);
+            _timer.Tick += Timer_Elapsed;
+            _remainingTimer = new DispatcherTimer();
+            _remainingTimer.Interval = TimeSpan.FromMilliseconds(500);
+            _remainingTimer.Tick += (sender, args) =>
+            {
+                var time = DateTime.Now - _startTime;
+                Remaining = $"{time.Minutes}:{time.Seconds}";
+                LbRemaining.Content = Remaining;
+            };
+            _timer.Start();
+            _remainingTimer.Start();
+        }
+
+        private void OnClosing(object sender, CancelEventArgs e)
+        {
+            StopTimer();
+        }
+
+        private void BtStart_OnClick(object sender, RoutedEventArgs e)
+        {
+            if(!_timer.IsEnabled)
+            {
+                if (String.IsNullOrEmpty(TbInterval.Text))
+                    MessageBox.Show("Empty interval", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                else
+                {
+                    var isNumeric = int.TryParse(TbInterval.Text, out int interval);
+                    if (isNumeric)
+                    {
+                        StartTimer(interval);
+                        LbStatus.Content = "Running";
+                    }
+                    else
+                        MessageBox.Show("Error parsing interval", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private void BtStop_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (_timer.IsEnabled)
+            {
+                StopTimer();
+                LbStatus.Content = "Stopped";
+            }
+        }
+        
+        protected void OnPropertyChanged(string name)
+        {
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if (handler != null)
+            {
+                handler(this, new PropertyChangedEventArgs(name));
+            }
         }
     }
 }
