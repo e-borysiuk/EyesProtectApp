@@ -6,6 +6,7 @@ using System.Media;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
+using System.Drawing;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -17,6 +18,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using Notifications.Wpf;
+using System.Windows.Forms;
 
 namespace EyesProtectApp
 {
@@ -30,6 +32,8 @@ namespace EyesProtectApp
         private DispatcherTimer _remainingTimer;
         private DateTime _startTime;
         private string _remaining;
+        NotifyIcon _notifyIcon = new NotifyIcon();
+        SoundPlayer _player;
 
         public string Remaining
         {
@@ -46,17 +50,55 @@ namespace EyesProtectApp
         public MainWindow()
         {
             InitializeComponent();
+            
+            _player = new SoundPlayer(FileStore.Resources.Resource.notif);
+            _player.Load();
+
+            _notifyIcon.Icon = FileStore.Resources.Resource.eye;
+            _notifyIcon.Visible = true;
+            _notifyIcon.Text = "EyesProtectApp";
+            _notifyIcon.DoubleClick +=
+                delegate (object sender, EventArgs args)
+                {
+                    this.Show();
+                    this.WindowState = WindowState.Normal;
+                };
+            _notifyIcon.MouseDown += _notifyIcon_MouseDown;
+            Closing += OnWindowClosing;
+
             WindowStartupLocation = WindowStartupLocation.CenterScreen;
+
             StartTimer(15);
             Closing += OnClosing;
+        }
+
+        private void _notifyIcon_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                System.Windows.Controls.ContextMenu menu = (System.Windows.Controls.ContextMenu)this.FindResource("NotifierContextMenu");
+                menu.IsOpen = true;
+            }
+        }
+
+        private void OnWindowClosing(object sender, CancelEventArgs e)
+        {
+            this.Hide();
+            e.Cancel = true;
+        }
+
+        protected override void OnStateChanged(EventArgs e)
+        {
+            if (WindowState == System.Windows.WindowState.Minimized)
+                this.Hide();
+            base.OnStateChanged(e);
         }
 
         private void Timer_Elapsed(object sender, EventArgs e)
         {
             _startTime = DateTime.Now;
-           _notificationManager.Show("Look away");
-           SystemSounds.Beep.Play();
-           SystemSounds.Beep.Play();
+            _notificationManager.Show("Look away");
+            _player.Play();
         }
 
         public static double ConvertMinutesToMilliseconds(double minutes)
@@ -98,7 +140,7 @@ namespace EyesProtectApp
             if(!_timer.IsEnabled)
             {
                 if (String.IsNullOrEmpty(TbInterval.Text))
-                    MessageBox.Show("Empty interval", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    System.Windows.MessageBox.Show("Empty interval", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 else
                 {
                     var isNumeric = int.TryParse(TbInterval.Text, out int interval);
@@ -108,7 +150,7 @@ namespace EyesProtectApp
                         LbStatus.Content = "Running";
                     }
                     else
-                        MessageBox.Show("Error parsing interval", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        System.Windows.MessageBox.Show("Error parsing interval", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -129,6 +171,11 @@ namespace EyesProtectApp
             {
                 handler(this, new PropertyChangedEventArgs(name));
             }
+        }
+
+        private void MenuItem_Close(object sender, RoutedEventArgs e)
+        {
+            System.Windows.Application.Current.Shutdown();
         }
     }
 }

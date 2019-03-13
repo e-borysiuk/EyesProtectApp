@@ -30,4 +30,9 @@
         <Button Name="BtStart" Click="BtStart_OnClick" Grid.Column="1" Grid.Row="2" Margin="20" Height="30" Width="100">Start</Button>
         <Button Name="BtStop" Click="BtStop_OnClick" Grid.Column="0" Grid.Row="2" Margin="20" Height="30" Width="100">Stop</Button>
     </Grid>
+    <Window.Resources>
+        <ContextMenu x:Key="NotifierContextMenu" Placement="MousePoint">
+            <MenuItem Header="Exit" Click="MenuItem_Close"/>
+        </ContextMenu>
+    </Window.Resources>
 </Window>
