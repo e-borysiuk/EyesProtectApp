@@ -70,6 +70,7 @@ namespace EyesProtectApp
 
             StartTimer(15);
             Closing += OnClosing;
+            this.Hide();
         }
 
         private void _notifyIcon_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
