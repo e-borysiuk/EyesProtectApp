@@ -16,6 +16,7 @@
             <RowDefinition></RowDefinition>
             <RowDefinition></RowDefinition>
             <RowDefinition></RowDefinition>
+            <RowDefinition></RowDefinition>
         </Grid.RowDefinitions>
         <StackPanel Grid.Column="0" Grid.Row="0" Orientation="Horizontal" Margin="10">
             <Label>Status: </Label>
@@ -23,12 +24,13 @@
         </StackPanel>
         <StackPanel Grid.Column="1" Grid.Row="0" Orientation="Horizontal" Margin="10">
             <Label>Next reminder:</Label>
-            <Label Name="LbRemaining" Content="{Binding Remaining}"></Label>
+            <Label Name="LbRemaining"></Label>
         </StackPanel>
         <Label HorizontalAlignment="Right" Grid.Column="0" Grid.Row="1" Margin="15">Interval:</Label>
-        <TextBox Padding="5" TextAlignment="Right" Grid.Column="1" Grid.Row="1"  Name="TbInterval" MinWidth="100" Margin="15">15</TextBox>
-        <Button Name="BtStart" Click="BtStart_OnClick" Grid.Column="1" Grid.Row="2" Margin="20" Height="30" Width="100">Start</Button>
-        <Button Name="BtStop" Click="BtStop_OnClick" Grid.Column="0" Grid.Row="2" Margin="20" Height="30" Width="100">Stop</Button>
+        <TextBox Padding="5" TextAlignment="Right" Grid.Column="1" Grid.Row="1" Name="TbInterval" MinWidth="100" Margin="15">15</TextBox>
+        <CheckBox Name="CbStartup" Checked="ChkStartUp_OnChecked" Grid.Column="1" Grid.Row="2" FlowDirection="RightToLeft" Margin="0,0,15,0">Run at startup</CheckBox>
+        <Button Name="BtStart" Click="BtStart_OnClick" Grid.Column="1" Grid.Row="3" Margin="20" Height="30" Width="100">Start</Button>
+        <Button Name="BtStop" Click="BtStop_OnClick" Grid.Column="0" Grid.Row="3" Margin="20" Height="30" Width="100">Stop</Button>
     </Grid>
     <Window.Resources>
         <ContextMenu x:Key="NotifierContextMenu" Placement="MousePoint">

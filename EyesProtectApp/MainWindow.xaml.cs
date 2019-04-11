@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Drawing;
+using System.Net.Mime;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -19,6 +20,8 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using Notifications.Wpf;
 using System.Windows.Forms;
+using Microsoft.Win32;
+using Application = System.Windows.Forms.Application;
 
 namespace EyesProtectApp
 {
@@ -31,11 +34,11 @@ namespace EyesProtectApp
         private DispatcherTimer _timer;
         private DispatcherTimer _remainingTimer;
         private DateTime _startTime;
-        private string _remaining;
+        private TimeSpan _remaining;
         NotifyIcon _notifyIcon = new NotifyIcon();
         SoundPlayer _player;
 
-        public string Remaining
+        public TimeSpan Remaining
         {
             get => _remaining;
             set
@@ -43,6 +46,17 @@ namespace EyesProtectApp
                 _remaining = value;
                 OnPropertyChanged(nameof(Remaining));
             }
+        }
+
+        private void SetStartup()
+        {
+            RegistryKey rk = Registry.CurrentUser.OpenSubKey
+                ("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+
+            if (CbStartup.IsChecked != null && CbStartup.IsChecked.Value)
+                rk.SetValue("EyesProtectApp", Application.ExecutablePath);
+            else
+                rk.DeleteValue("EyesProtectApp", false);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -124,8 +138,11 @@ namespace EyesProtectApp
             _remainingTimer.Tick += (sender, args) =>
             {
                 var time = DateTime.Now - _startTime;
-                Remaining = $"{time.Minutes}:{time.Seconds}";
-                LbRemaining.Content = Remaining;
+                var currentMilis = time.TotalMilliseconds;
+                var intervalMilis = TimeSpan.FromMinutes(interval).TotalMilliseconds;
+                //var remainingMillis = intervalMilis - currentMilis;
+                Remaining = TimeSpan.FromMinutes(interval).Subtract(time);
+                LbRemaining.Content = Remaining.ToString(@"mm\:ss");
             };
             _timer.Start();
             _remainingTimer.Start();
@@ -177,6 +194,11 @@ namespace EyesProtectApp
         private void MenuItem_Close(object sender, RoutedEventArgs e)
         {
             System.Windows.Application.Current.Shutdown();
+        }
+
+        private void ChkStartUp_OnChecked(object sender, RoutedEventArgs e)
+        {
+            this.SetStartup();
         }
     }
 }
