@@ -18,10 +18,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
-using Notifications.Wpf;
 using System.Windows.Forms;
 using Microsoft.Win32;
 using Application = System.Windows.Forms.Application;
+using ToastNotifications;
+using ToastNotifications.Position;
+using ToastNotifications.Lifetime;
+using ToastNotifications.Messages;
+using ToastNotifications.Core;
 
 namespace EyesProtectApp
 {
@@ -30,7 +34,25 @@ namespace EyesProtectApp
     /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly NotificationManager _notificationManager = new NotificationManager();
+        Notifier notifier = new Notifier(cfg =>
+        {
+            cfg.PositionProvider = new PrimaryScreenPositionProvider(
+                corner: Corner.BottomRight,
+                offsetX: 10,
+                offsetY: 10);
+
+            cfg.LifetimeSupervisor = cfg.LifetimeSupervisor = new CountBasedLifetimeSupervisor(maximumNotificationCount: MaximumNotificationCount.UnlimitedNotifications());
+
+            cfg.Dispatcher = Dispatcher.CurrentDispatcher;
+        });
+        MessageOptions options = new MessageOptions
+        {
+            FontSize = 22, // set notification font size
+            NotificationClickAction = n => // set the callback for notification click event
+            {
+                n.Close(); // call Close method to remove notification
+            }
+        };
         private DispatcherTimer _timer;
         private DispatcherTimer _remainingTimer;
         private DateTime _startTime;
@@ -112,7 +134,8 @@ namespace EyesProtectApp
         private void Timer_Elapsed(object sender, EventArgs e)
         {
             _startTime = DateTime.Now;
-            _notificationManager.Show("Look away");
+            notifier.ShowWarning("Look away", options);
+            //_notificationManager.Show("Look away", expirationTime: TimeSpan.FromMinutes(15));
             _player.Play();
         }
 

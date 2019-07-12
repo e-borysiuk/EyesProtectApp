@@ -6,18 +6,10 @@
              xmlns:controls="clr-namespace:Notifications.Wpf.Controls;assembly=Notifications.Wpf"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-        <local:CustomTemplateSelector x:Key="CustomTemplateSelector" />
-
-        <Style TargetType="controls:Notification">
-            <Setter Property="ContentTemplateSelector" Value="{StaticResource CustomTemplateSelector}" />
-            <Style.Resources>
-                <DataTemplate DataType="{x:Type system:String}" x:Key="PinkStringTemplate">
-                    <Label MinHeight="80"
-                           Content="{Binding}"
-                           Foreground="DeepPink" HorizontalContentAlignment="Center"
-                           VerticalContentAlignment="Center" />
-                </DataTemplate>
-            </Style.Resources>
-        </Style>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/ToastNotifications.Messages;component/Themes/Default.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>
